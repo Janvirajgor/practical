@@ -10,7 +10,7 @@
                         <h2>{{ __('Update Profile') }}</h2>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('update',$user->id) }}" method="POST">
+                        <form action="{{ route('update',$user->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="user_id" id="user_id" value="{{ $user->id }}">
@@ -50,9 +50,9 @@
 
                             <div class="form-group">
                                 Gender : <br>
-                                <input type="radio" id="male" name="gender" value="{{ $user->gender }}">
+                                <input type="radio" id="male" name="gender" value="male">
                                 <label for="male">Male</label>
-                                <input type="radio" id="female" name="gender" value="{{ $user->gender }}">
+                                <input type="radio" id="female" name="gender" value="female">
                                 <label for="female">Female</label><br>
                             </div>
 

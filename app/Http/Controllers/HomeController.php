@@ -41,9 +41,6 @@ class HomeController extends Controller
         return view('auth.editprofile', compact('user'));
     }
 
-
-
-
     public function updateProfile(Request $request, User $users, $id)
     {
         $user = $users->find($id);
@@ -55,7 +52,7 @@ class HomeController extends Controller
             'hobbies' => ['required', 'nullable'],
         ]);
 
-        $profile_image = $request->file('profile_image');
+        $profile_image = $request->profile_image;
 
         //generate unique id for image
         $name_gen = hexdec(uniqid());
@@ -67,12 +64,23 @@ class HomeController extends Controller
         $last_img = $up_location . $img_name;
         $profile_image->move($up_location, $img_name);
 
-        // if (isset($input['image'])) {
-        //     $user->image($last_img);
-        // }
+        if (!isset($request['image'])) {
+            $user->image($last_img);
+        }
 
         // else {
-        $user->forceFill([
+        // $user->forceFill([
+        //     'name' => $request->name,
+        //     'mobile' => $request->mobile,
+        //     'address' => $request->address,
+        //     'image' => $last_img,
+        //     'hobbies' => $request->hobbies,
+        //     'gender' => $request->gender,
+        //     'updated_at' => Carbon::now()
+        // ])->save();
+        // }
+
+        $user->update([
             'name' => $request->name,
             'mobile' => $request->mobile,
             'address' => $request->address,
@@ -80,23 +88,22 @@ class HomeController extends Controller
             'hobbies' => $request->hobbies,
             'gender' => $request->gender,
             'updated_at' => Carbon::now()
-        ])->save();
-        // }
+        ]);
 
         $user->find($request->user_id);
 
-        $email_data = array(
-            'name' => $user['name'],
-            'mobile' => $user['mobile'],
-            'address' => $user['address'],
-            'gender' => $user['gender'],
-        );
+        // $email_data = array(
+        //     'name' => $user['name'],
+        //     'mobile' => $user['mobile'],
+        //     'address' => $user['address'],
+        //     'gender' => $user['gender'],
+        // );
 
-        Mail::send('welcome_email', $email_data, function ($message) use ($email_data) {
-            $message->to($email_data['name'], $email_data['mobile'], $email_data['address'], $email_data['gender'])
-                ->subject('Welcome to System')
-                ->from('admin@gmail.com');
-        });
+        // Mail::send('welcome_email', $email_data, function ($message) use ($email_data) {
+        //     $message->to($email_data['name'], $email_data['mobile'], $email_data['address'], $email_data['gender'])
+        //         ->subject('Welcome to System')
+        //         ->from('admin@gmail.com');
+        // });
 
         return redirect('/profile/' . $request->user_id);
     }
