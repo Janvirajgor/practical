@@ -52,58 +52,55 @@ class HomeController extends Controller
             'hobbies' => ['required', 'nullable'],
         ]);
 
-        $profile_image = $request->profile_image;
 
-        //generate unique id for image
-        $name_gen = hexdec(uniqid());
+        $profile_image = $request->file('profile_image');
 
-        //image extention
-        $img_ext = strtolower($profile_image->getClientOriginalExtension());
-        $img_name = $name_gen . '.' . $img_ext;
-        $up_location = 'image/';
-        $last_img = $up_location . $img_name;
-        $profile_image->move($up_location, $img_name);
+        if ($profile_image) {
+            //generate unique id for image
+            $name_gen = hexdec(uniqid());
 
-        if (!isset($request['image'])) {
-            $user->image($last_img);
+            //image extention
+            $img_ext = strtolower($profile_image->getClientOriginalExtension());
+            $img_name = $name_gen . '.' . $img_ext;
+            $up_location = 'image/post/';
+            $last_img = $up_location . $img_name;
+            $profile_image->move($up_location, $img_name);
+
+            $user->update([
+                'name' => $request->name,
+                'mobile' => $request->mobile,
+                'address' => $request->address,
+                'image' => $last_img,
+                'hobbies' => $request->hobbies,
+                'gender' => $request->gender,
+                'updated_at' => Carbon::now()
+            ]);
+
+            return redirect()->route('post.index')
+                ->with('success', 'Post updated successfully');
+        } else {
+            $user->update([
+                'name' => $request->name,
+                'mobile' => $request->mobile,
+                'address' => $request->address,
+                'hobbies' => $request->hobbies,
+                'gender' => $request->gender,
+                'updated_at' => Carbon::now()
+            ]);
         }
 
-        // else {
-        // $user->forceFill([
-        //     'name' => $request->name,
-        //     'mobile' => $request->mobile,
-        //     'address' => $request->address,
-        //     'image' => $last_img,
-        //     'hobbies' => $request->hobbies,
-        //     'gender' => $request->gender,
-        //     'updated_at' => Carbon::now()
-        // ])->save();
-        // }
+        $email_data = array(
+            'name' => $user['name'],
+            'mobile' => $user['mobile'],
+            'address' => $user['address'],
+            'gender' => $user['gender'],
+        );
 
-        $user->update([
-            'name' => $request->name,
-            'mobile' => $request->mobile,
-            'address' => $request->address,
-            'image' => $last_img,
-            'hobbies' => $request->hobbies,
-            'gender' => $request->gender,
-            'updated_at' => Carbon::now()
-        ]);
-
-        $user->find($request->user_id);
-
-        // $email_data = array(
-        //     'name' => $user['name'],
-        //     'mobile' => $user['mobile'],
-        //     'address' => $user['address'],
-        //     'gender' => $user['gender'],
-        // );
-
-        // Mail::send('welcome_email', $email_data, function ($message) use ($email_data) {
-        //     $message->to($email_data['name'], $email_data['mobile'], $email_data['address'], $email_data['gender'])
-        //         ->subject('Welcome to System')
-        //         ->from('admin@gmail.com');
-        // });
+        Mail::send('welcome_email', $email_data, function ($message) use ($email_data) {
+            $message->to($email_data['name'], $email_data['mobile'], $email_data['address'], $email_data['gender'])
+                ->subject('Welcome to System')
+                ->from('admin@gmail.com');
+        });
 
         return redirect('/profile/' . $request->user_id);
     }
