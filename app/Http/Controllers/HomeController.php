@@ -44,50 +44,46 @@ class HomeController extends Controller
     public function updateProfile(Request $request, User $users, $id)
     {
         $user = $users->find($id);
-        $request->validate([
+
+        $this->validate($request, [
             'name' => 'required',
-            'mobile' => ['required', 'unique:users', 'digits:10'],
-            'address' => ['required', 'string', 'max:255'],
-            'gender' => ['required', 'nullable'],
-            'hobbies' => ['required', 'nullable'],
+            'mobile' => 'required | digits:10',
+            'address' => 'required|string| max:255',
+            'gender' => 'required',
+            'hobbies' => 'required',
+            'profile_image' => 'required'
         ]);
+        // $request->validate([
+        //     'name' => 'required',
+        //     'mobile' => ['required', 'unique:users', 'digits:10'],
+        //     'address' => ['required', 'string', 'max:255'],
+        //     'gender' => ['required', 'nullable'],
+        //     'hobbies' => ['required', 'nullable'],
+        // ]);
 
 
-        $profile_image = $request->file('profile_image');
+        $profile_image = $request->profile_image;
 
-        if ($profile_image) {
-            //generate unique id for image
-            $name_gen = hexdec(uniqid());
 
-            //image extention
-            $img_ext = strtolower($profile_image->getClientOriginalExtension());
-            $img_name = $name_gen . '.' . $img_ext;
-            $up_location = 'image/post/';
-            $last_img = $up_location . $img_name;
-            $profile_image->move($up_location, $img_name);
+        //generate unique id for image
+        $name_gen = hexdec(uniqid());
 
-            $user->update([
-                'name' => $request->name,
-                'mobile' => $request->mobile,
-                'address' => $request->address,
-                'image' => $last_img,
-                'hobbies' => $request->hobbies,
-                'gender' => $request->gender,
-                'updated_at' => Carbon::now()
-            ]);
+        //image extention
+        $img_ext = strtolower($profile_image->getClientOriginalExtension());
+        $img_name = $name_gen . '.' . $img_ext;
+        $up_location = 'image/';
+        $last_img = $up_location . $img_name;
+        $profile_image->move($up_location, $img_name);
 
-            return redirect()->route('post.index')
-                ->with('success', 'Post updated successfully');
-        } else {
-            $user->update([
-                'name' => $request->name,
-                'mobile' => $request->mobile,
-                'address' => $request->address,
-                'hobbies' => $request->hobbies,
-                'gender' => $request->gender,
-                'updated_at' => Carbon::now()
-            ]);
-        }
+        $user->update([
+            'name' => $request->name,
+            'mobile' => $request->mobile,
+            'address' => $request->address,
+            'image' => $last_img,
+            'hobbies' => $request->hobbies,
+            'gender' => $request->gender,
+            'updated_at' => Carbon::now()
+        ]);
 
         $email_data = array(
             'name' => $user['name'],

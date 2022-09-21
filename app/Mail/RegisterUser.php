@@ -36,6 +36,6 @@ class RegisterUser extends Mailable
         $address = $this->details['address'];
         $gender = $this->details['gender'];
 
-        return $this->view('email.sendEnailToUser', compact('name', 'mobile', 'address', 'gender'));
+        return $this->view('emails.sendEnailToUser', compact('name', 'mobile', 'address', 'gender'));
     }
 }
