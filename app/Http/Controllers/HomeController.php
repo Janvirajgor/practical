@@ -92,7 +92,7 @@ class HomeController extends Controller
             'gender' => $user['gender'],
         );
 
-        Mail::send('welcome_email', $email_data, function ($message) use ($email_data) {
+        Mail::send('sendEmailToUser', $email_data, function ($message) use ($email_data) {
             $message->to($email_data['name'], $email_data['mobile'], $email_data['address'], $email_data['gender'])
                 ->subject('Welcome to System')
                 ->from('admin@gmail.com');
